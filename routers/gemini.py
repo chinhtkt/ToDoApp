@@ -21,7 +21,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 
 
 class QuestionRequest(BaseModel):
-    """Request model cho câu hỏi"""
+    """Request model for question"""
     prompt: str
 
 
@@ -32,18 +32,18 @@ async def ask_question(
     request: QuestionRequest
 ):
     """
-    Gửi câu hỏi đến AI Agent
+    Send question to AI Agent
     
-    Agent có thể gọi các tool để:
-    - Tạo todo mới
-    - Xem todo
-    - Cập nhật todo
-    - Xóa todo
-    - Lấy tất cả todo
+    Agent can call tools to:
+    - Create new todo
+    - View todo
+    - Update todo
+    - Delete todo
+    - Get all todos
     
     Example:
     {
-        "prompt": "Tạo một todo với tiêu đề 'Học Python' và mô tả 'Học LangChain' với độ ưu tiên 5"
+        "prompt": "Create a todo with title 'Learn Python' and description 'Learn LangChain' with priority 5"
     }
     """
     if user is None:
@@ -55,10 +55,10 @@ async def ask_question(
         
         logger.info(f"User {user.get('username')} (ID: {user_id}) asked: {prompt}")
         
-        # Khởi tạo agent
+        # Initialize agent
         agent = TodoAgent(db)
         
-        # Xử lý tin nhắn
+        # Process message
         response = await agent.process_message(prompt, user_id)
         
         logger.info(f"Agent response: {response}")

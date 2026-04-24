@@ -1,5 +1,5 @@
 """
-AI Agent cho Todo App - sử dụng Gemini LLM với tool-calling
+AI Agent for Todo App - using Gemini LLM with tool-calling
 """
 import json
 import logging
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class TodoRequest(BaseModel):
-    """Request model cho Todo"""
+    """Request model for Todo"""
     title: str
     description: str
     priority: int
@@ -29,26 +29,26 @@ class TodoRequest(BaseModel):
 
 
 class AgentState(TypedDict):
-    """State của Agent"""
+    """State of the Agent"""
     messages: Annotated[list, add_messages]
     user_id: int
     db: Session
 
 
 class TodoAgent:
-    """AI Agent cho quản lý Todo với tool-calling"""
+    """AI Agent for managing Todo with tool-calling"""
     
     def __init__(self, db: Session):
         """
-        Khởi tạo Agent
+        Initialize Agent
         
         Args:
             db: SQLAlchemy session
         """
-        # Lấy API key từ environment
+        # Get API key from environment
         api_key = os.environ.get("GOOGLE_API_KEY")
         if not api_key:
-            raise ValueError("GOOGLE_API_KEY không tìm thấy trong .env file!")
+            raise ValueError("GOOGLE_API_KEY not found in .env file!")
         
         self.db = db
         self.llm = ChatGoogleGenerativeAI(
@@ -60,11 +60,11 @@ class TodoAgent:
         self.llm_with_tools = self.llm.bind_tools(self.tools)
         
     def _define_tools(self):
-        """Định nghĩa các tool có thể gọi"""
+        """Define available tools"""
         tools = [
             {
                 "name": "get_all_todos",
-                "description": "Lấy tất cả todo của user hiện tại",
+                "description": "Get all todos of current user",
                 "input_schema": {
                     "type": "object",
                     "properties": {},
@@ -73,13 +73,13 @@ class TodoAgent:
             },
             {
                 "name": "get_todo",
-                "description": "Lấy một todo cụ thể theo ID",
+                "description": "Get a specific todo by ID",
                 "input_schema": {
                     "type": "object",
                     "properties": {
                         "todo_id": {
                             "type": "integer",
-                            "description": "ID của todo"
+                            "description": "ID of the todo"
                         }
                     },
                     "required": ["todo_id"]
@@ -87,27 +87,27 @@ class TodoAgent:
             },
             {
                 "name": "create_todo",
-                "description": "Tạo một todo mới",
+                "description": "Create a new todo",
                 "input_schema": {
                     "type": "object",
                     "properties": {
                         "title": {
                             "type": "string",
-                            "description": "Tiêu đề của todo"
+                            "description": "Title of the todo"
                         },
                         "description": {
                             "type": "string",
-                            "description": "Mô tả của todo"
+                            "description": "Description of the todo"
                         },
                         "priority": {
                             "type": "integer",
-                            "description": "Độ ưu tiên (1-5)",
+                            "description": "Priority (1-5)",
                             "minimum": 1,
                             "maximum": 5
                         },
                         "complete": {
                             "type": "boolean",
-                            "description": "Trạng thái hoàn thành (mặc định: false)"
+                            "description": "Completion status (default: false)"
                         }
                     },
                     "required": ["title", "description", "priority"]
@@ -115,29 +115,29 @@ class TodoAgent:
             },
             {
                 "name": "update_todo",
-                "description": "Cập nhật một todo",
+                "description": "Update a todo",
                 "input_schema": {
                     "type": "object",
                     "properties": {
                         "todo_id": {
                             "type": "integer",
-                            "description": "ID của todo"
+                            "description": "ID of the todo"
                         },
                         "title": {
                             "type": "string",
-                            "description": "Tiêu đề mới"
+                            "description": "New title"
                         },
                         "description": {
                             "type": "string",
-                            "description": "Mô tả mới"
+                            "description": "New description"
                         },
                         "priority": {
                             "type": "integer",
-                            "description": "Độ ưu tiên mới (1-5)"
+                            "description": "New priority (1-5)"
                         },
                         "complete": {
                             "type": "boolean",
-                            "description": "Trạng thái hoàn thành mới"
+                            "description": "New completion status"
                         }
                     },
                     "required": ["todo_id"]
@@ -145,13 +145,13 @@ class TodoAgent:
             },
             {
                 "name": "delete_todo",
-                "description": "Xóa một todo",
+                "description": "Delete a todo",
                 "input_schema": {
                     "type": "object",
                     "properties": {
                         "todo_id": {
                             "type": "integer",
-                            "description": "ID của todo cần xóa"
+                            "description": "ID of the todo to delete"
                         }
                     },
                     "required": ["todo_id"]
@@ -162,15 +162,15 @@ class TodoAgent:
 
     def _execute_tool(self, tool_name: str, tool_input: dict, user_id: int) -> str:
         """
-        Thực thi một tool
-        
+        Execute a tool
+
         Args:
-            tool_name: Tên của tool
-            tool_input: Input của tool
-            user_id: ID của user
-            
+            tool_name: Name of the tool
+            tool_input: Input for the tool
+            user_id: User ID
+
         Returns:
-            Kết quả của tool (dạng string)
+            Tool result (as string)
         """
         try:
             if tool_name == "get_all_todos":
@@ -194,7 +194,7 @@ class TodoAgent:
                     Todos.owner_id == user_id
                 ).first()
                 if not todo:
-                    return json.dumps({"error": f"Todo {todo_id} không tìm thấy"})
+                    return json.dumps({"error": f"Todo {todo_id} not found"})
                 return json.dumps({
                     "id": todo.id,
                     "title": todo.title,
@@ -220,7 +220,7 @@ class TodoAgent:
                     "description": new_todo.description,
                     "priority": new_todo.priority,
                     "complete": new_todo.complete,
-                    "message": "Todo đã được tạo thành công"
+                    "message": "Todo created successfully"
                 }, ensure_ascii=False)
             
             elif tool_name == "update_todo":
@@ -230,8 +230,8 @@ class TodoAgent:
                     Todos.owner_id == user_id
                 ).first()
                 if not todo:
-                    return json.dumps({"error": f"Todo {todo_id} không tìm thấy"})
-                
+                    return json.dumps({"error": f"Todo {todo_id} not found"})
+
                 if "title" in tool_input:
                     todo.title = tool_input["title"]
                 if "description" in tool_input:
@@ -249,7 +249,7 @@ class TodoAgent:
                     "description": todo.description,
                     "priority": todo.priority,
                     "complete": todo.complete,
-                    "message": "Todo đã được cập nhật thành công"
+                    "message": "Todo updated successfully"
                 }, ensure_ascii=False)
             
             elif tool_name == "delete_todo":
@@ -259,38 +259,38 @@ class TodoAgent:
                     Todos.owner_id == user_id
                 ).first()
                 if not todo:
-                    return json.dumps({"error": f"Todo {todo_id} không tìm thấy"})
-                
+                    return json.dumps({"error": f"Todo {todo_id} not found"})
+
                 self.db.delete(todo)
                 self.db.commit()
                 return json.dumps({
-                    "message": f"Todo {todo_id} đã được xóa thành công"
+                    "message": f"Todo {todo_id} deleted successfully"
                 }, ensure_ascii=False)
             
             else:
-                return json.dumps({"error": f"Tool '{tool_name}' không tồn tại"})
-                
+                return json.dumps({"error": f"Tool '{tool_name}' does not exist"})
+
         except Exception as e:
-            logger.error(f"Lỗi khi thực thi tool {tool_name}: {str(e)}")
-            return json.dumps({"error": f"Lỗi: {str(e)}"})
+            logger.error(f"Error executing tool {tool_name}: {str(e)}")
+            return json.dumps({"error": f"Error: {str(e)}"})
 
     async def process_message(self, user_message: str, user_id: int) -> str:
         """
-        Xử lý tin nhắn từ user
-        
+        Process user message
+
         Args:
-            user_message: Tin nhắn của user
-            user_id: ID của user
-            
+            user_message: User message
+            user_id: User ID
+
         Returns:
-            Phản hồi từ agent
+            Agent response
         """
         from langchain_core.messages import HumanMessage, ToolMessage
-        
+
         messages = [HumanMessage(content=user_message)]
-        logger.info(f"User {user_id} gửi: {user_message}")
-        
-        # Loop xử lý tool-calling
+        logger.info(f"User {user_id} sent: {user_message}")
+
+        # Loop to process tool-calling
         max_iterations = 5
         iteration = 0
         
@@ -298,33 +298,33 @@ class TodoAgent:
             iteration += 1
             logger.debug(f"Iteration {iteration}")
             
-            # Gọi LLM
+            # Call LLM
             response = self.llm_with_tools.invoke(messages)
             messages.append(response)
             
-            # Kiểm tra nếu có tool calls
+            # Check for tool calls
             if not response.tool_calls:
-                # Không có tool call - return final response
+                # No tool call - return final response
                 return response.content
             
-            # Xử lý các tool calls
+            # Process tool calls
             for tool_call in response.tool_calls:
                 tool_name = tool_call["name"]
                 tool_input = tool_call["args"]
                 tool_use_id = tool_call["id"]
                 
-                logger.info(f"Gọi tool: {tool_name} với input: {tool_input}")
-                
-                # Thực thi tool
+                logger.info(f"Calling tool: {tool_name} with input: {tool_input}")
+
+                # Execute tool
                 result = self._execute_tool(tool_name, tool_input, user_id)
-                logger.debug(f"Kết quả tool: {result}")
-                
-                # Thêm kết quả vào messages
+                logger.debug(f"Tool result: {result}")
+
+                # Add result to messages
                 messages.append(ToolMessage(
                     content=result,
                     tool_call_id=tool_use_id,
                     name=tool_name
                 ))
         
-        return "Đã đạt giới hạn số lần lặp lại. Vui lòng thử lại."
+        return "Maximum iterations reached. Please try again."
 

@@ -1,5 +1,5 @@
 """
-Test script cho TodoAgent - chạy bằng: python test_agent.py
+Test script for TodoAgent - run with: python test_agent.py
 """
 import asyncio
 import logging
@@ -30,7 +30,7 @@ async def test_agent():
     db = SessionLocal()
     
     try:
-        # Tạo test user
+        # Create test user
         test_user = Users(
             username="testuser",
             email="test@example.com",
@@ -45,90 +45,90 @@ async def test_agent():
         db.refresh(test_user)
         user_id = test_user.id
         
-        logger.info(f"✅ Tạo test user: {test_user.username} (ID: {user_id})")
+        logger.info(f"Create test user: {test_user.username} (ID: {user_id})")
         
-        # Khởi tạo agent
+        # Initialize agent
         agent = TodoAgent(db)
-        logger.info("✅ TodoAgent initialized")
+        logger.info("TodoAgent initialized")
         
-        # Test 1: Tạo todo
+        # Test 1: Create todo
         print("\n" + "="*60)
-        print("Test 1: Tạo một todo mới")
+        print("Test 1: Create a new todo")
         print("="*60)
         response = await agent.process_message(
-            "Tạo một todo với tiêu đề 'Học Python' và mô tả 'Học LangChain' với độ ưu tiên 5",
+            "Create a todo with title 'Learn Python' and description 'Learn LangChain' with priority 5",
             user_id
         )
         print(f"Agent response: {response}\n")
         
-        # Test 2: Xem tất cả todo
+        # Test 2: View all todos
         print("\n" + "="*60)
-        print("Test 2: Xem tất cả todo")
+        print("Test 2: View all todos")
         print("="*60)
         response = await agent.process_message(
-            "Hiển thị tất cả todo của tôi",
+            "Display all my todos",
             user_id
         )
         print(f"Agent response: {response}\n")
         
-        # Test 3: Tạo todo khác
+        # Test 3: Create another todo
         print("\n" + "="*60)
-        print("Test 3: Tạo todo khác")
+        print("Test 3: Create another todo")
         print("="*60)
         response = await agent.process_message(
-            "Tạo một task mới: 'Học FastAPI' với mô tả 'Xây dựng API' và độ ưu tiên 3",
+            "Create a new task: 'Learn FastAPI' with description 'Build API' and priority 3",
             user_id
         )
         print(f"Agent response: {response}\n")
         
-        # Test 4: Cập nhật todo
+        # Test 4: Update todo
         print("\n" + "="*60)
-        print("Test 4: Cập nhật todo")
+        print("Test 4: Update todo")
         print("="*60)
         response = await agent.process_message(
-            "Cập nhật todo số 1, đánh dấu là hoàn thành",
+            "Update todo number 1, mark it as complete",
             user_id
         )
         print(f"Agent response: {response}\n")
         
-        # Test 5: Xem chi tiết một todo
+        # Test 5: View todo details
         print("\n" + "="*60)
-        print("Test 5: Xem chi tiết todo")
+        print("Test 5: View todo details")
         print("="*60)
         response = await agent.process_message(
-            "Cho tôi xem chi tiết của todo số 2",
+            "Show me the details of todo number 2",
             user_id
         )
         print(f"Agent response: {response}\n")
         
-        # Test 6: Xóa todo
+        # Test 6: Delete todo
         print("\n" + "="*60)
-        print("Test 6: Xóa todo")
+        print("Test 6: Delete todo")
         print("="*60)
         response = await agent.process_message(
-            "Xóa todo số 1",
+            "Delete todo number 1",
             user_id
         )
         print(f"Agent response: {response}\n")
         
-        # Test 7: Xem lại tất cả todo
+        # Test 7: View all todos again
         print("\n" + "="*60)
-        print("Test 7: Xem lại tất cả todo sau khi xóa")
+        print("Test 7: View all todos after deletion")
         print("="*60)
         response = await agent.process_message(
-            "Cho tôi xem tất cả todo hiện tại",
+            "Show me all current todos",
             user_id
         )
         print(f"Agent response: {response}\n")
         
     except Exception as e:
-        logger.error(f"❌ Lỗi: {str(e)}", exc_info=True)
+        logger.error(f"Error: {str(e)}", exc_info=True)
     finally:
         db.close()
 
 
 if __name__ == "__main__":
-    print("\n🤖 Testing TodoAgent...\n")
+    print("\nTesting TodoAgent...\n")
     asyncio.run(test_agent())
-    print("\n✅ Testing completed!")
+    print("\nTesting completed!")
 
